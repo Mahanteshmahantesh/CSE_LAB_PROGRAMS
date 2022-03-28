@@ -1,0 +1,91 @@
+class Graph:
+    def __init__(self,graph,heuristicNodeList,startNode):
+        self.graph=graph
+        self.H=heuristicNodeList
+        self.start=startNode
+        self.parent={}
+        self.status={}
+        self.solutionGraph={}
+        
+    def applyAOStar(self):
+        self.aoStar(self.start,False)
+        
+        
+    def getneighbors(self,v):
+        return self.graph.get(v,'')
+    
+    def getstatus(self,v):
+        return self.status.get(v,0)
+    
+    def setstatus(self,v,val):
+        self.status[v]=val
+    
+    def getHeuristicNodevalue(self,n):
+        return self.H.get(n,0)
+    
+    def setHeuristicNodevalue(self,n,value):
+        self.H[n]=value
+        
+    def printsolution(self):
+        print('traverse from start node',self.start)
+        print("-----------------------------------")
+        print(self.solutionGraph)
+        print("-----------------------------------")
+        
+        
+    def computeminimumcostchildnodes(self,v):
+        minimumcost=0
+        costtochildnodelistdict={}
+        costtochildnodelistdict[minimumcost]=[]
+        flag=True
+        for nodeInfoTuplelist in self.getneighbors(v):
+            cost=0
+            nodelist=[]
+            for c,weight in nodeInfoTuplelist:
+                
+                cost=cost+self.getHeuristicNodevalue(c)+weight
+                nodelist.append(c)
+                
+            if flag==True:
+                    minimumcost=cost
+                    costtochildnodelistdict[minimumcost]=nodelist
+                    flag=False
+            else:
+                
+                 if minimumcost>cost:
+                        
+                        minimumcost=cost
+                        costtochildnodelistdict[minimumcost]=nodelist
+        return   minimumcost, costtochildnodelistdict[minimumcost]
+    
+    
+    def aoStar(self,v,backtracking):
+        print('heuristic node values',self.H)
+        print('solution graph',self.solutionGraph)
+        print('processing node',v)
+        print('--------------------------------------------------------------')
+        
+        if self.getstatus(v)>=0:
+            minimumcost,childnodelist= self.computeminimumcostchildnodes(v)
+            print(minimumcost,childnodelist)
+            self.setHeuristicNodevalue(v,minimumcost)
+            self.setstatus(v,len(childnodelist))
+            solved=True
+            for childnode in childnodelist:
+                self.parent[childnode]=v
+                if self.getstatus(childnode)!=-1:
+                    solved=solved & False
+            if solved==True:
+                self.setstatus(v,-1)
+                self.solutionGraph[v]=childnodelist
+                
+            if v!=self.start:
+                self.aoStar(self.parent[v],True)
+            if backtracking==False:
+                for childnode in childnodelist:
+                    
+                    self.setstatus(childnode,0)
+                    self.aoStar(childnode,False)
+                    
+
+    
